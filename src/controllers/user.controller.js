@@ -5,9 +5,6 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 
 const registerUser = asyncHandler(async (req, res) => {
-  //   res.status(201).json({
-  //     message: "User registered Successfully",
-  //   })
   const { fullName, email, userName, password } = req.body
 
   if (
@@ -27,8 +24,15 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const avatarLocalPath = req.files?.avatar[0]?.path
-  console.log("avatarLocalPath: ", avatarLocalPath)
-  const coverImagePath = req?.files?.coverImage[0]?.path
+  let coverImagePath
+
+  if (
+    req?.files &&
+    Array?.isArray(req?.files?.coverImage) &&
+    req?.files?.coverImage?.length > 0
+  ) {
+    coverImagePath = req?.files?.coverImage[0]?.path
+  }
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required")
@@ -59,7 +63,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(200, UserGenerated, "User Registered Successfully"))
+    .json(new ApiResponse(201, UserGenerated, "User Registered Successfully"))
 })
 
 export { registerUser }
