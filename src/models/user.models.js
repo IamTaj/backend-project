@@ -12,7 +12,7 @@ const userSchema = new Schema(
       trim: true,
       index: true,
     },
-    userName: {
+    email: {
       type: String,
       require: true,
       unique: true,
@@ -54,11 +54,10 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next()
   } else {
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
     next()
   }
 })
-
 
 //custom hooks/methods
 userSchema.methods.isPasswordCorrect = async function (password) {
