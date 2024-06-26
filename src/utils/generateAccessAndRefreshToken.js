@@ -1,5 +1,5 @@
-import { User } from "../models/user.models"
-import { ApiError } from "./ApiErrors"
+import { User } from "../models/user.models.js"
+import { ApiError } from "./ApiErrors.js"
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -7,8 +7,8 @@ const generateAccessAndRefreshToken = async (userId) => {
     const accessToken = user?.generateAccessToken()
     const refreshToken = user?.generateRefreshToken()
 
-    user?.refreshToken = refreshToken
-    await user?.save({ validateBeforeSave: false })
+    user.refreshToken = refreshToken
+    await user.save({ validateBeforeSave: false })
 
     return { accessToken, refreshToken }
   } catch (error) {
