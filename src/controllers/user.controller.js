@@ -5,7 +5,9 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { generateAccessAndRefreshToken } from "../utils/generateAccessAndRefreshToken.js"
 import { emailValidator, passwordValidator } from "../utils/validators.js"
+import { cookieOption } from "../utils/cookieOption.js"
 
+//Register User Controller
 const registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, userName, password } = req.body
 
@@ -81,6 +83,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, UserGenerated, "User Registered Successfully"))
 })
 
+//Login User Controller
 const loginUser = asyncHandler(async (req, res) => {
   const { email, userName, password } = req?.body
   if (!(email || userName)) {
@@ -107,15 +110,10 @@ const loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken",
   )
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  }
-
   return res
     ?.status(200)
-    ?.cookie("accessToken", accessToken, options)
-    ?.cookie("refreshToken", refreshToken)
+    ?.cookie("accessToken", accessToken, cookieOption)
+    ?.cookie("refreshToken", refreshToken, cookieOption)
     ?.json(
       new ApiResponse(
         200,
@@ -129,6 +127,7 @@ const loginUser = asyncHandler(async (req, res) => {
     )
 })
 
+//Logout User Controller
 const logoutUser = asyncHandler(async (req, res) => {
   await User?.findByIdAndUpdate(
     req?.user?._id,
@@ -140,16 +139,52 @@ const logoutUser = asyncHandler(async (req, res) => {
     },
   )
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  }
-
   return res
     ?.status(200)
-    ?.clearCookie("accessToken", options)
-    ?.clearCookie("refreshToken", options)
+    ?.clearCookie("accessToken", cookieOption)
+    ?.clearCookie("refreshToken", cookieOption)
     ?.json(new ApiResponse(200, {}, "User logged out successfully"))
 })
 
-export { registerUser, loginUser, logoutUser }
+//Refresh AccessToken Controller
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const incomingRefreshToken =
+    req?.cookie?.refresAccessToken || req?.body?.refresAccessToken
+
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Unauthorized Access")
+  }
+
+  try {
+    const decodedToken = jwt.verify(incomingRefreshToken, REFRESH_TOKEN_SECRET)
+
+    const user = await User?.findById(decodedToken?._id)
+
+    if (!user) {
+      throw new ApiError(401, "Unauthorized Access")
+    }
+
+    if (incomingRefreshToken !== user?.refreshToken) {
+      throw new ApiError(401, "Refresh Token is expired or used")
+    }
+
+    const { accessToken, newRefreshToken } =
+      await generateAccessAndRefreshToken(user?._id)
+
+    return res
+      ?.status(200)
+      ?.cookie("accessToken", accessToken, cookieOption)
+      ?.cookie("refreshToken", newRefreshToken, cookieOption)
+      ?.json(
+        new ApiResponse(
+          200,
+          { accessToken, newRefreshToken },
+          "Access token refreshed",
+        ),
+      )
+  } catch (error) {
+    throw new ApiError(error?.message || "Invalid refresh token")
+  }
+})
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken }
