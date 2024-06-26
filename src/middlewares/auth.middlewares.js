@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import jwt from "jsonwebtoken"
 import { User } from "../models/user.models.js"
 
-//this middleware is used to verify the existing user or not 
+//this middleware is used to verify the existing user or not
 
 export const JWTVerifier = asyncHandler(async (req, _, next) => {
   try {

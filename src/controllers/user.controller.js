@@ -71,9 +71,7 @@ const registerUser = asyncHandler(async (req, res) => {
     userName: userName?.toLowerCase(),
   })
 
-  const UserGenerated = await User.findById(user?._id)?.select(
-    "-password -refreshToken ",
-  )
+  const UserGenerated = await User.findById(user?._id)?.select("-refreshToken ")
   if (!UserGenerated) {
     throw new ApiError(500, "Something went wrong while registering the user")
   }
@@ -123,8 +121,8 @@ const loginUser = asyncHandler(async (req, res) => {
         200,
         {
           user: loggedInUser,
-          accessToken: accessToken,
-          refreshToken: refreshToken,
+          accessToken,
+          refreshToken,
         },
         "User loggedIn successfully",
       ),
