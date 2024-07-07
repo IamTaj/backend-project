@@ -1,5 +1,6 @@
 import { Router } from "express"
 import {
+  getCurrentUser,
   getUserChanneLProfile,
   getWatchHistory,
   loginUser,
@@ -33,6 +34,7 @@ router.route("/logout").post(JWTVerifier, logoutUser)
 router.route("/refresh-token").post(refreshAccessToken)
 router.route("/update-password").post(JWTVerifier, updatePassword)
 router.route("/update-account").patch(JWTVerifier, updateAccountsDetails)
+router.route("/current-user").get(JWTVerifier,getCurrentUser)
 
 router
   .route("/update-avatar")

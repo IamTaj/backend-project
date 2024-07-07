@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiErrors.js"
 import { User } from "../models/user.models.js"
-import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import { destroyOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { generateAccessAndRefreshToken } from "../utils/generateAccessAndRefreshToken.js"
 import { emailValidator, passwordValidator } from "../utils/validators.js"
@@ -246,6 +246,8 @@ const updateAvatar = asyncHandler(async (req, res) => {
     )
   }
 
+  await destroyOnCloudinary(req.user.avatar)
+
   const avatar = await uploadOnCloudinary(avatarLocalPath)
 
   if (!avatar?.url) {
@@ -270,6 +272,13 @@ const updateAvatar = asyncHandler(async (req, res) => {
   return res
     ?.status(200)
     ?.json(new ApiResponse(200, user, "Avatar is been updated successfully"))
+})
+
+//Get User Details
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "User fetched successfully"))
 })
 
 //Update Account Cover Image
@@ -446,6 +455,7 @@ export {
   updatePassword,
   updateAccountsDetails,
   updateAvatar,
+  getCurrentUser,
   updateCoverImage,
   getUserChanneLProfile,
   getWatchHistory,
