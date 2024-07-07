@@ -36,7 +36,7 @@ router.route("/update-account").patch(JWTVerifier, updateAccountsDetails)
 
 router
   .route("/update-avatar")
-  .patch(JWTVerifier, upload.single("coverImage"), updateAvatar)
+  .patch(JWTVerifier, upload.single("avatar"), updateAvatar)
 
 router
   .route("/update-coverimage")
